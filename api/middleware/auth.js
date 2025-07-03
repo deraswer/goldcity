@@ -1,92 +1,29 @@
-import jwt from 'jsonwebtoken';
-import { callEthContract, callPolygonContract, callBscContract, callArbitrumContract, callAvalancheContract, callFantomContract, callHarmonyContract, callHecoContract, callKlayContract, callMaticContract, callMoonbeamContract, callHashedContract, callOptimismContract, callPalmContract, callRoninContract, callXDaiContract } from '../config/getContract.js';
+// authMiddleware.js
+import jwt from "jsonwebtoken";
 
-const EthContact = (() => {
-  callEthContract();
-});
+const authMiddleware = async (req, res, next) => {
+  const token = req.header("authorization")?.replace("Bearer ", "");
 
-const PolygonContact = (() => {
-  callPolygonContract();
-});
-
-const BscContact = (() => {
-  callBscContract();
-});
-
-const ArbitrumContact = (() => {
-  callArbitrumContract();
-});
-
-const AvalancheContact = (() => {
-  callAvalancheContract();
-});
-
-const FantomContact = (() => {
-  callFantomContract();
-});
-
-const HarmonyContact = (() => {
-  callHarmonyContract();
-});
-
-const HecoContact = (() => {
-  callHecoContract();
-});
-
-const KlayContact = (() => {
-  callKlayContract();
-});
-
-const MaticContact = (() => {
-  callMaticContract();
-});
-
-const MoonbeamContact = (() => {
-  callMoonbeamContract();
-});
-
-const HashedContact = (() => {
-  callHashedContract();
-})();
-
-const OptimismContact = (() => {
-  callOptimismContract();
-});
-
-const PalmContact = (() => {
-  callPalmContract();
-});
-
-const RoninContact = (() => {
-  callRoninContract();
-});
-
-const XDaiContact = (() => {
-  callXDaiContract();
-});
-
-const authMiddleware = function (req, res, next) {
-  // Get token from header
-  const token = req.header('x-auth-token');
-
-  // Check if not token
   if (!token) {
-    return res.status(401).json({ msg: 'No token, authorization denied' });
+    return res.status(401).json({ msg: "No token, authorization denied" });
   }
 
-  // Verify token
   try {
-    jwt.verify(token, "hello", (error, decoded) => {
-      if (error) {
-        return res.status(401).json({ msg: 'Token is not valid' });
-      } else {
-        req.user = decoded.user;
-        next();
-      }
+    const decoded = await new Promise((resolve, reject) => {
+      jwt.verify(token, process.env.JWT_SECRET || "hello", (error, decoded) => {
+        if (error) reject(error);
+        else resolve(decoded);
+      });
     });
-  } catch (err) {
-    console.error('something wrong with auth middleware');
-    res.status(500).json({ msg: 'Server Error' });
+
+    req.user = decoded;
+    if (!req.user.walletAddress) {
+      return res.status(401).json({ msg: "Token missing walletAddress" });
+    }
+    next();
+  } catch (error) {
+    console.error("Token verification error:", error.message); // Отладка
+    res.status(401).json({ msg: "Token is not valid", error: error.message });
   }
 };
 

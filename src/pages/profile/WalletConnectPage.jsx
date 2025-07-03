@@ -1,6 +1,6 @@
 // WalletConnectPage.jsx
-import React from 'react';
-import WalletConnect from '../../components/WalletConnect';
+import React from "react";
+import WalletConnect from "../../components/WalletConnect";
 
 const WalletConnectPage = () => {
   return (
@@ -16,10 +16,13 @@ const WalletConnectPage = () => {
             </p>
             <div className="h-px w-24 bg-[var(--border-color)] mb-8"></div>
           </div>
-          
-          <h2 className="text-2xl font-light text-[var(--text-primary)] mb-6">IDENTITY BRIDGE</h2>
+
+          <h2 className="text-2xl font-light text-[var(--text-primary)] mb-6">
+            IDENTITY BRIDGE
+          </h2>
           <p className="text-[var(--text-secondary)] mb-8">
-            Connect your wallet to get started with decentralized identity management
+            Connect your wallet to get started with decentralized identity
+            management
           </p>
           <WalletConnect />
         </div>
