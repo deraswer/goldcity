@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const verificationSchema = new mongoose.Schema({
   verificationId: { type: String, required: true, unique: true },
-  walletAddress: { type: String, required: true },
   status: {
     type: String,
     enum: ["PENDING", "VERIFIED", "REJECTED"],

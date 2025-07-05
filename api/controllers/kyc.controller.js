@@ -5,24 +5,89 @@ import {
   updateVerificationWithProof,
 } from "../repositories/mongodb/actions/kyc.js";
 import crypto from "crypto";
+// import { Onfido } from "onfido-sdk-ui";
+
+// const onfido = Onfido.init({
+//   apiToken: process.env.ONFIDO_API_TOKEN,
+//   region: process.env.ONFIDO_REGION || "EU",
+// });
 
 const initVerification = async (req, res) => {
   try {
-    const { walletAddress } = req.body;
-    if (!walletAddress) {
-      return res.status(400).json({ message: "walletAddress is required" });
+    const { email, firstName, lastName } = req.body;
+
+    // Validate required fields
+    if (!email || !firstName || !lastName) {
+      return res.status(400).json({
+        message: "email, firstName, lastName are required",
+      });
     }
 
+    // // Create an Onfido applicant
+    // const applicant = await onfido.applicant.create({
+    //   email,
+    //   first_name: firstName,
+    //   last_name: lastName,
+    // });
+
+    // // Generate an SDK token for the applicant
+    // const sdkToken = await onfido.sdkToken.generate({
+    //   applicant_id: applicant.id,
+    //   referrer: process.env.ONFIDO_REFERRER || "*", // Adjust referrer as needed
+    // });
+
+    // // Create a workflow run (assumes a specific workflow ID is configured)
+    // const workflowRun = await onfido.workflowRun.create({
+    //   applicant_id: applicant.id,
+    //   workflow_id: process.env.ONFIDO_WORKFLOW_ID, // Set your workflow ID in env
+    // });
+
+    // Temporary placeholders for Onfido data (replace with actual values once Onfido is set up)
+    const dummySdkToken =
+      "dummy-sdk-token-" + crypto.randomBytes(16).toString("hex");
+    const dummyWorkflowRunId =
+      "dummy-workflow-run-" + crypto.randomBytes(16).toString("hex");
+
+    // Store verification details in the database
     const verificationId = crypto.randomBytes(16).toString("hex");
-    const newVerification = await createVerification({
+    await createVerification({
       verificationId,
-      walletAddress,
+      status: "PENDING", // Matches schema default
+      proof: null, // Matches schema default
     });
-    res.status(201).json({ success: true, verificationId });
+
+    // Return the required data for the frontend
+    res.status(201).json({
+      success: true,
+      verificationId,
+      sdkToken: dummySdkToken,
+      workflowRunId: dummyWorkflowRunId,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error initializing verification:", error);
+    res
+      .status(500)
+      .json({ message: error.message || "Failed to initialize verification" });
   }
 };
+
+// const initVerification = async (req, res) => {
+//   try {
+//     const { walletAddress } = req.body;
+//     if (!walletAddress) {
+//       return res.status(400).json({ message: "walletAddress is required" });
+//     }
+
+//     const verificationId = crypto.randomBytes(16).toString("hex");
+//     const newVerification = await createVerification({
+//       verificationId,
+//       walletAddress,
+//     });
+//     res.status(201).json({ success: true, verificationId });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 const getVerificationStatus = async (req, res) => {
   try {
