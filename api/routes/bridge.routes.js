@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.route("/verifications").post(requestVerification);
 router.route("/bridge-tokens").post(bridgeTokens);
-router.route("/transfers/:transferId").post(getTokenTransferStatus);
-router.route("/verifications/:requestId").post(getVerificationStatus);
+router.route("/transfers/:transferId").get(getTokenTransferStatus);
+router.route("/verifications/:requestId").get(getVerificationStatus);
 
 export default router;

@@ -53,6 +53,16 @@ const getUserVerifications = async (req, res) => {
   }
 };
 
+const getUserVerificationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const verification = await getVerificationById(id);
+    res.status(200).json({ success: true, verification });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const generateProof = async (req, res) => {
   try {
     const { verificationId } = req.params;
@@ -86,5 +96,6 @@ export {
   initVerification,
   getVerificationStatus,
   getUserVerifications,
+  getUserVerificationById,
   generateProof,
 };
