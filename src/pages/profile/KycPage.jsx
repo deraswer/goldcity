@@ -13,9 +13,13 @@ const KycPage = () => {
   const { verificationId, status, level, proofId } = useSelector(
     (state) => state.kyc
   );
+  const { user } = useSelector((state) => state.auth); // Get user from auth state
 
-  // Fetch user's verification history
-  const { data: verificationsData, isLoading } = useGetUserVerificationsQuery();
+  // Fetch user's verification history, passing walletAddress if required
+  const walletAddress = user?.walletAddress;
+  const { data: verificationsData, isLoading } = useGetUserVerificationsQuery(
+    walletAddress || undefined // Pass walletAddress or undefined if backend handles filtering
+  );
 
   // Generate ZK proof mutation
   const [generateProof, { isLoading: isGeneratingProof }] =

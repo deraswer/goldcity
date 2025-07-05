@@ -201,9 +201,6 @@ const OnfidoVerificationPage = () => {
               sdkInitializedRef.current = false;
               setIsLoading(false);
             },
-            onModalRequestClose: () => {
-              navigate("/profile/kyc");
-            },
           });
           console.log("Onfido SDK initialized successfully");
         } catch (error) {

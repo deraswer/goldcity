@@ -14,12 +14,20 @@ import crypto from "crypto";
 
 const initVerification = async (req, res) => {
   try {
-    const { email, firstName, lastName } = req.body;
+    const { email, firstName, lastName, walletAddress } = req.body;
 
     // Validate required fields
     if (!email || !firstName || !lastName) {
       return res.status(400).json({
-        message: "email, firstName, lastName are required",
+        message: "email, firstName, and lastName are required",
+      });
+    }
+
+    // Get walletAddress from req.user (authentication) or req.body
+    const userWalletAddress = req.user?.walletAddress || walletAddress;
+    if (!userWalletAddress) {
+      return res.status(400).json({
+        message: "walletAddress is required",
       });
     }
 
@@ -52,6 +60,7 @@ const initVerification = async (req, res) => {
     const verificationId = crypto.randomBytes(16).toString("hex");
     await createVerification({
       verificationId,
+      walletAddress: userWalletAddress,
       status: "PENDING", // Matches schema default
       proof: null, // Matches schema default
     });
@@ -109,12 +118,33 @@ const getVerificationStatus = async (req, res) => {
 
 const getUserVerifications = async (req, res) => {
   try {
-    const verifications = await getVerificationsByWallet(
-      req.user.walletAddress
-    );
-    res.status(200).json({ success: true, verifications });
+    // Get walletAddress from authenticated user
+    const walletAddress = req.user?.walletAddress;
+    if (!walletAddress) {
+      return res.status(400).json({ message: "walletAddress is required" });
+    }
+
+    // Query verifications for the user's walletAddress
+    const verifications = await getVerificationsByWallet(walletAddress);
+
+    // Map verifications to match frontend expectations
+    const formattedVerifications = verifications.map((v) => ({
+      id: v.verificationId,
+      status: v.status,
+      submitted_at: v.createdAt,
+      verification_level: v.status === "VERIFIED" ? "BASIC" : "UNKNOWN", // Adjust based on your logic
+      provider: "Onfido", // Hardcoded for now, adjust as needed
+    }));
+
+    res.status(200).json({
+      success: true,
+      verifications: formattedVerifications,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error fetching user verifications:", error);
+    res
+      .status(500)
+      .json({ message: error.message || "Failed to fetch verifications" });
   }
 };
 
